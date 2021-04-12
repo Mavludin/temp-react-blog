@@ -23,12 +23,13 @@ export class EditPostForm extends Component {
   savePost = (e) => {
     e.preventDefault()
     const post = {
+      id: this.props.selectedPost.id,
       title: this.state.postTitle,
       description: this.state.postDesc,
       liked: this.props.selectedPost.liked,
     }
 
-    this.props.editBlogPost(post, this.props.selectedPost.id);
+    this.props.editBlogPost(post);
     this.props.handleEditFormHide()
   }
 
@@ -74,6 +75,7 @@ export class EditPostForm extends Component {
               placeholder="Описание поста"
               value={this.state.postDesc}
               onChange={this.handlePostDescChange}
+              rows={8}
               required
             />
           </div>

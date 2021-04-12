@@ -1,11 +1,19 @@
-header {
+.mainHeader {
     text-align: center;
     padding: 10px;
     box-shadow: rgb(204 204 204) 0px 2px 10px;
     height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mainHeader nav {
+    display: flex;
+    align-items: center;
 }
   
-header a {
+.mainHeader a {
     color: #000;
     font-weight: 500;
     transition: all .2s linear;
@@ -16,10 +24,17 @@ header a {
     margin: 0 10px;
 }
 
-header a:hover {
+.mainHeader a:hover {
     color: #d15700
 }
 
-header .blackBtn {
+.mainHeader .userName {
+    font-size: 18px;
+}
+
+.mainHeader .blackBtn {
     padding: 2px 10px;
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
 }

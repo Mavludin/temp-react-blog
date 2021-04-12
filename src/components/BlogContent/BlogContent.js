@@ -1,9 +1,15 @@
 import axios from "axios";
-import { Component } from "react";
+import React, { Component } from "react";
+import { NavLink } from "react-router-dom";
+import { postsAPI } from "../../shared/projectData";
 import "./BlogContent.css";
 import { AddPostForm } from "./components/AddPostForm";
-import { BlogCard } from "./components/BlogCard";
 import { EditPostForm } from "./components/EditPostForm";
+
+import FavoriteIcon from "@material-ui/icons/Favorite";
+import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
+import EditIcon from "@material-ui/icons/Edit";
+import { fetchData } from "../../shared/projectLogic";
 
 export class BlogContent extends Component {
   state = {
@@ -15,38 +21,45 @@ export class BlogContent extends Component {
   };
 
   fetchPosts = () => {
-    this.setState({
-      isPending: true,
+    fetchData(postsAPI).then(data => {
+      console.log(data)
+      this.setState({
+        blogArr: data,
+        isPending: false,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
     });
+  };
+
+  componentDidMount() {
+    this.fetchPosts();
+  }
+
+  likePost = (blogPost) => {
+    const temp = { ...blogPost };
+    temp.liked = !temp.liked;
+
     axios
-      .get("https://5fb3db44b6601200168f7fba.mockapi.io/api/posts")
+      .put(`${postsAPI}${blogPost.id}`,temp)
       .then((response) => {
-        this.setState({
-          blogArr: response.data,
-          isPending: false,
-        });
+        console.log("Пост изменен => ", response.data);
+        this.fetchPosts();
       })
       .catch((err) => {
         console.log(err);
       });
   };
 
-  likePost = (pos) => {
-    const temp = [...this.state.blogArr];
-    temp[pos].liked = !temp[pos].liked;
-
-    this.setState({
-      blogArr: temp,
-    });
-
-    localStorage.setItem("blogPosts", JSON.stringify(temp));
-  };
-
   deletePost = (blogPost) => {
     if (window.confirm(`Удалить ${blogPost.title}?`)) {
+      this.setState({
+        isPending: true,
+      });
       axios
         .delete(
-          `https://5fb3db44b6601200168f7fba.mockapi.io/api/posts/${blogPost.id}`
+          `${postsAPI}${blogPost.id}`
         )
         .then((response) => {
           console.log("Пост удален => ", response.data);
@@ -57,6 +70,37 @@ export class BlogContent extends Component {
         });
     }
   };
+
+  addNewBlogPost = (blogPost) => {
+    this.setState({
+      isPending: true,
+    });
+    axios
+      .post(postsAPI, blogPost)
+      .then((response) => {
+        console.log("Пост создан =>", response.data);
+        this.fetchPosts();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+
+  editBlogPost = (updatedBlogPost) => {
+    this.setState({
+      isPending: true,
+    });
+    axios.put(`${postsAPI}${updatedBlogPost.id}`, updatedBlogPost)
+    .then((response) => {
+      console.log("Пост отредактирован =>", response.data);
+      this.fetchPosts();
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
+  }
 
   handleAddFormShow = () => {
     this.setState({
@@ -70,24 +114,8 @@ export class BlogContent extends Component {
     });
   };
 
-  handleEscape = (e) => {
-    if (e.key === "Escape" && this.state.showAddForm) {
-      this.handleAddFormHide();
-    }
-  };
-
-  addNewBlogPost = (blogPost) => {
-    this.setState((state) => {
-      const posts = [...state.blogArr];
-      posts.push(blogPost);
-      localStorage.setItem("blogPosts", JSON.stringify(posts));
-      return {
-        blogArr: posts,
-      };
-    });
-  };
-
   handleEditFormShow = (post) => {
+    console.log(post)
     this.setState({
       showEditForm: true,
       selectedPost: post,
@@ -100,42 +128,36 @@ export class BlogContent extends Component {
     });
   };
 
-  editBlogPost = (blogPost, id) => {
-    axios
-      .put(
-        `https://5fb3db44b6601200168f7fba.mockapi.io/api/posts/${id}`,
-        blogPost
-      )
-      .then((response) => {
-        console.log("Пост удален => ", response.data);
-        this.fetchPosts();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
-  componentDidMount() {
-    this.fetchPosts();
-  }
-
   render() {
     const blogPosts = this.state.blogArr.map((item, pos) => {
+      const heartFill = item.liked ? "crimson" : "black";
       return (
-        <BlogCard
-          key={item.id}
-          title={item.title}
-          description={item.description}
-          liked={item.liked}
-          likePost={() => this.likePost(pos)}
-          deletePost={() => this.deletePost(item)}
-          handleEditFormShow={() => this.handleEditFormShow(item)}
-        />
+        <div className="post" key={item.id}>
+          <div className="postContent">
+            <h2>{item.title}</h2>
+            <p>{item.description}</p>
+            <div>
+              <button onClick={()=>this.likePost(item)}>
+                <FavoriteIcon style={{ fill: heartFill }} />
+              </button>
+            </div>
+          </div>
+          <div className="postControl">
+            <button className="editBtn" onClick={()=>this.handleEditFormShow(item)}>
+              <EditIcon />
+            </button>
+            <button className="deleteBtn" onClick={()=>this.deletePost(item)}>
+              <DeleteForeverIcon />
+            </button>
+          </div>
+          <div>
+            <NavLink exact to={`blog/${item.id}`}>Gooo</NavLink>
+          </div>
+        </div>
       );
     });
 
     if (this.state.blogArr.length === 0) return <h1>Загружаю данные...</h1>;
-    console.log(this.props)
     return (
       <div className="blogPage">
         {this.state.showAddForm && (
@@ -161,7 +183,6 @@ export class BlogContent extends Component {
               Создать новый пост
             </button>
           </div>
-          {this.state.isPending && <h2>Подождите...</h2>}
           <div className="posts">{blogPosts}</div>
         </>
       </div>

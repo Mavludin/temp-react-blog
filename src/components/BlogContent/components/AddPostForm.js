@@ -39,7 +39,6 @@ export class AddPostForm extends Component {
     }
   };
 
-
   componentDidMount() {
     window.addEventListener('keyup', this.handleEscape)
   }
@@ -47,7 +46,6 @@ export class AddPostForm extends Component {
   componentWillUnmount() {
     window.removeEventListener("keyup", this.handleEscape);
   }
-
 
   render() {
     const handleAddFormHide = this.props.handleAddFormHide;
@@ -76,6 +74,7 @@ export class AddPostForm extends Component {
               placeholder="Описание поста"
               value={this.state.postDesc}
               onChange={this.handlePostDescChange}
+              rows={8}
               required
             />
           </div>

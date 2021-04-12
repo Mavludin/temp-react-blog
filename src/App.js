@@ -10,7 +10,7 @@ export function App() {
     localStorage.getItem("isLoggedIn") === "true"
   );
 
-  const handleLogIn = (formLogin) => {
+  const handleLogIn = () => {
     localStorage.setItem("isLoggedIn", true);
     setIsLoggedIn(true);
   };

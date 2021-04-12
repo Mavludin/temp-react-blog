@@ -1,6 +1,7 @@
 import { Redirect, Route, Switch } from "react-router-dom";
 import { LoginPage } from "../../containers/LoginPage/LoginPage";
 import { BlogContent } from "../BlogContent/BlogContent";
+import { BlogCard } from "../BlogContent/components/BlogCard";
 
 export const Routes = ({
   isLoggedIn,
@@ -32,6 +33,15 @@ export const Routes = ({
           isLoggedIn ? <BlogContent {...props} /> : <Redirect to="/login" />
         }
       />
+
+      <Route
+        exact
+        path="/blog/:postId"
+        render={(props) =>
+          isLoggedIn ? <BlogCard {...props} /> : <Redirect to="/login" />
+        }
+      />
+
     </Switch>
   );
 };
